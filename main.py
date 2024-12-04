@@ -44,6 +44,7 @@ async def login_usuario(usuario: str = Form(...), photo: str = Form(...)):
     except Exception as e:
         return {"success": False, "error": str(e)}
 
+@app.head("/check")
 @app.get("/check")
 async def health_check():
     return {"status": "OK"}
