@@ -1,5 +1,8 @@
 import base64
 import os
+
+from dotenv import load_dotenv
+
 os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
 import numpy as np
 import gridfs
@@ -34,10 +37,12 @@ def load_mobilenet():
         print(f"Error al cargar el archivo '{archivo}': {e}")
         exit(1)
 
+load_dotenv()
+
 def conectar_mongobb(MONGO_HOST = "localhost", MONGO_PORT = "27017", MONGO_DB = "Ejemplo", MONGO_TIMEOUT = 1000):
     try:
-        MONGO_URI = "mongodb://localhost:27017"
-        #MONGO_URI = "mongodb+srv://hugorojas:admin1234@itj-desarrollo.yi09p.mongodb.net/?retryWrites=true&w=majority&appName=ITJ-DESARROLLO"
+        #MONGO_URI = "mongodb://localhost:27017"
+        MONGO_URI = os.getenv("MONGO_URI")
         MONGO_CLIENT = MongoClient(MONGO_URI)
         try:
             return MONGO_CLIENT
