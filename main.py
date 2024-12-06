@@ -1,4 +1,4 @@
-from fastapi import FastAPI, UploadFile, Form
+from fastapi import FastAPI, UploadFile, Form, HTTPException
 from registro_facial import registro_facial, login_captura_facial, consultar_imagen_usuario_2
 
 app = FastAPI()
@@ -8,19 +8,25 @@ app = FastAPI()
 @app.post("/registro/")
 async def registrar_usuario(usuario: str = Form(...), photo: str = Form(...)):
     try:
-        # Pasar directamente los datos recibidos a `registro_facial`
+
+        if not usuario or not photo:
+            raise HTTPException(status_code=400, detail="Faltan datos obligatorios")
+
+
         img_id = registro_facial(usuario, photo)
 
-        # Validar el resultado de `registro_facial`
         if img_id is None:
-            return {"success": False, "error": "No se detectaron rostros"}
+            raise HTTPException(status_code=422, detail="No se detectaron rostros")
         elif img_id is False:
-            return {"success": False, "error": "Error al decodificar la imagen"}
+            raise HTTPException(status_code=422, detail="Error al decodificar la imagen")
 
         return {"success": True, "img_id": str(img_id)}
 
+    except HTTPException as e:
+        return {"success": False, "error": e.detail}
     except Exception as e:
-        return {"success": False, "error": str(e)}
+
+        return {"success": False, "error": "Error inesperado: " + str(e)}
 
 
 # Endpoint para iniciar sesión con reconocimiento facial
