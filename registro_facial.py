@@ -63,8 +63,6 @@ def load_facenet_model():
         print("Error al cargar el modelo:", e)
         return None
 
-facenet = load_facenet_model()
-
 """
 def load_vgg_model():
     try:
@@ -128,6 +126,8 @@ def extract_faces(image,bboxes,new_size=(160,160)):
 class L2Normalization(Layer):
     def call(self, inputs):
         return tf.math.l2_normalize(inputs, axis=1)
+
+facenet = load_facenet_model()
 
 # Funcion que guarda la imagen del registro en mongo
 def imagen_register_mongodb(bd, coleccion, rostro, name):
