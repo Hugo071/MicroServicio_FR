@@ -42,7 +42,7 @@ async def login_usuario(usuario: str = Form(...), photo: str = Form(...)):
         if result is True:
             return {"success": True, "result": "A"}
         elif result is False:
-            raise HTTPException(status_code=401, detail="Autenticación fallida")
+            return {"success": False, "result": "N"}
         elif result == -100:
             raise HTTPException(status_code=422, detail="Error al decodificar la imagen")
         elif result == -200:
