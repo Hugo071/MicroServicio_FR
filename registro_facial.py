@@ -63,6 +63,8 @@ def load_facenet_model():
         print("Error al cargar el modelo:", e)
         return None
 
+facenet = load_facenet_model()
+
 """
 def load_vgg_model():
     try:
@@ -299,7 +301,6 @@ def login_captura_facial(user_face, frame):
     #plt.imshow(login_face)
     #plt.show()
 
-    facenet = load_facenet_model()
     user_embeddingf = calcular_embedding(facenet, user_face)
     login_embeddingf = calcular_embedding(facenet, login_face)
 
