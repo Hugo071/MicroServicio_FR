@@ -127,8 +127,6 @@ class L2Normalization(Layer):
     def call(self, inputs):
         return tf.math.l2_normalize(inputs, axis=1)
 
-facenet = load_facenet_model()
-
 # Funcion que guarda la imagen del registro en mongo
 def imagen_register_mongodb(bd, coleccion, rostro, name):
     #rostro = load_image("rostros_planos/", "c.jpg")
@@ -300,7 +298,7 @@ def login_captura_facial(user_face, frame):
 
     #plt.imshow(login_face)
     #plt.show()
-
+    facenet = load_facenet_model()
     user_embeddingf = calcular_embedding(facenet, user_face)
     login_embeddingf = calcular_embedding(facenet, login_face)
 
