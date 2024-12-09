@@ -12,7 +12,6 @@ async def registrar_usuario(usuario: str = Form(...), photo: str = Form(...)):
         if not usuario or not photo:
             raise HTTPException(status_code=400, detail="Faltan datos obligatorios")
 
-
         img_id = registro_facial(usuario, photo)
 
         if img_id is None:
@@ -22,11 +21,8 @@ async def registrar_usuario(usuario: str = Form(...), photo: str = Form(...)):
 
         return {"success": True, "img_id": str(img_id)}
 
-    except HTTPException as e:
-        return {"success": False, "error": e.detail}
     except Exception as e:
-
-        return {"success": False, "error": "Error inesperado: " + str(e)}
+        raise HTTPException(status_code=500, detail=f"Error inesperado: {str(e)}")
 
 
 # Endpoint para iniciar sesión con reconocimiento facial
@@ -35,9 +31,9 @@ async def login_usuario(usuario: str = Form(...), photo: str = Form(...)):
     # Obtener la imagen registrada desde la base de datos
     user_face = consultar_imagen_usuario_2(imagen_id=usuario)
     if user_face is False or user_face.size == 0:
-        return {"success": False, "error": "Usuario no encontrado"}
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
     if user_face is None:
-        return {"success": False, "error": "Ocurrio un error al recuperar la imagen"}
+        raise HTTPException(status_code=500, detail="Error al recuperar la imagen")
     try:
         # Pasar directamente los datos recibidos a `registro_facial`
         result = login_captura_facial(user_face, photo)
@@ -46,14 +42,14 @@ async def login_usuario(usuario: str = Form(...), photo: str = Form(...)):
         if result is True:
             return {"success": True, "result": "A"}
         elif result is False:
-            return {"success": False, "error": "N"}
+            raise HTTPException(status_code=401, detail="Autenticación fallida")
         elif result == -100:
-            return {"success": False, "error": "Error al decodificar la imagen"}
+            raise HTTPException(status_code=422, detail="Error al decodificar la imagen")
         elif result == -200:
-            return {"success": False, "error": "No se detectaron rostros"}
+            raise HTTPException(status_code=422, detail="No se detectaron rostros")
 
     except Exception as e:
-        return {"success": False, "error": "Error inesperado: " + str(e)}
+        raise HTTPException(status_code=500, detail=f"Error inesperado: {str(e)}")
 
 @app.head("/check")
 @app.get("/check")
