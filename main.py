@@ -35,18 +35,18 @@ async def login_usuario(usuario: str = Form(...), photo: str = Form(...)):
             raise HTTPException(status_code=404, detail="Usuario no encontrado")
         if user_face is None:
             raise HTTPException(status_code=500, detail="Error al recuperar la imagen")
-            # Pasar directamente los datos recibidos a `registro_facial`
-            result = login_captura_facial(user_face, photo)
+        # Pasar directamente los datos recibidos a `registro_facial`
+        result = login_captura_facial(user_face, photo)
 
-            # Validar el resultado de `registro_facial`
-            if result is True:
-                return {"success": True, "result": "A"}
-            elif result is False:
-                return {"success": False, "result": "N"}
-            elif result == -100:
-                raise HTTPException(status_code=422, detail="Error al decodificar la imagen")
-            elif result == -200:
-                raise HTTPException(status_code=422, detail="No se detectaron rostros")
+        # Validar el resultado de `registro_facial`
+        if result is True:
+            return {"success": True, "result": "A"}
+        elif result is False:
+            return {"success": False, "result": "N"}
+        elif result == -100:
+            raise HTTPException(status_code=422, detail="Error al decodificar la imagen")
+        elif result == -200:
+            raise HTTPException(status_code=422, detail="No se detectaron rostros")
     except HTTPException as e:
         raise e
     except Exception as e:
