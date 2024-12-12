@@ -50,6 +50,9 @@ def conectar_mongobb(MONGO_HOST = "localhost", MONGO_PORT = "27017", MONGO_DB = 
     except errors.ServerSelectionTimeoutError as err:
         return "Tiempo excedido ->" + str(err)
 
+con = conectar_mongobb()
+print("Conexión realizada: ",str(con))
+
 def load_facenet_model():
     try:
         with custom_object_scope({'L2Normalization': L2Normalization}):
@@ -129,21 +132,21 @@ class L2Normalization(Layer):
 
 # Funcion que guarda la imagen del registro en mongo
 def imagen_register_mongodb(bd, coleccion, rostro, name):
+    print("Metodo registro de imagen ejecutandose")
     #rostro = load_image("rostros_planos/", "c.jpg")
     #plt.imshow(cv2.cvtColor(rostro, cv2.COLOR_BGR2RGB))
     _, buffer = cv2.imencode('.jpg', rostro)  # Convierte la imagen a binario JPEG
     img_data = buffer.tobytes()  # Convierte el buffer a bytes
-    con = conectar_mongobb()
     try:
         db = con[bd]
         fs = gridfs.GridFS(db, collection=coleccion)
         img_id = fs.put(img_data, filename=name)
         print(f"Imagen almacenada con ID: {img_id}")
         return img_id
-        con.close()
+        #con.close()
     except Exception as e:
         print(f"Ocurrió un error al almacenar la imagen: {e}")
-        con.close()
+        #con.close()
         return None
 
 # Funcion que registra el rostro, lo captura y almacena de acuerdo a los requerimientos de Facenet
@@ -233,8 +236,9 @@ def consultar_imagen_usuario(bd="FACEGUARD", coleccion="Register", imagen_id="")
 
 def consultar_imagen_usuario_2(bd="FACEGUARD", coleccion="Register", imagen_id=""):
     # Conectar a MongoDB
-    con = conectar_mongobb()
+    #con = conectar_mongobb()
     try:
+        print("Metodo consultar imagen ejecutandose")
         db = con[bd]
         fs = gridfs.GridFS(db, collection=coleccion)
         # Buscar el archivo por nombre de usuario
@@ -255,16 +259,17 @@ def consultar_imagen_usuario_2(bd="FACEGUARD", coleccion="Register", imagen_id="
 
             return user_face  # Retorna los datos de la imagen en formato OpenCV
         else:
-            con.close()
+            #con.close()
             print("El usuario no existe")
             return False
     except Exception as e:
         print(f"Ocurrió un error al recuperar la imagen: {e}")
-        con.close()
+        #con.close()
         return None
 
 def login_captura_facial(user_face, frame):
     #num = 0
+    print("Metodo login ejecutandose")
     # Decodificar la imagen base64
     photo_data = frame.split(",")[1]  # Elimina el prefijo de tipo
     img_data = base64.b64decode(photo_data)
