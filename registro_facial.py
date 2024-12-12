@@ -8,12 +8,12 @@ import numpy as np
 import gridfs
 import tensorflow as tf
 import cv2
-#from keras import Layer
-#from keras.api.models import load_model
-#from keras.src.saving import custom_object_scope
-#from pymongo import MongoClient, errors
-#from pymongo.errors import OperationFailure
-#from bson import ObjectId
+from keras import Layer
+from keras.api.models import load_model
+from keras.src.saving import custom_object_scope
+from pymongo import MongoClient, errors
+from pymongo.errors import OperationFailure
+from bson import ObjectId
 
 def load_mobilenet():
     # Define el archivo
@@ -52,7 +52,7 @@ def conectar_mongobb(MONGO_HOST = "localhost", MONGO_PORT = "27017", MONGO_DB = 
         return "Tiempo excedido ->" + str(err)
 """
 
-"""
+
 def load_facenet_model():
     try:
         with custom_object_scope({'L2Normalization': L2Normalization}):
@@ -65,7 +65,7 @@ def load_facenet_model():
     except EOFError as e:
         print("Error al cargar el modelo:", e)
         return None
-"""
+
 
 """
 def load_vgg_model():
@@ -127,11 +127,11 @@ def extract_faces(image,bboxes,new_size=(160,160)):
         cropped_faces.append(cv2.resize(face,dsize=new_size))
     return cropped_faces
 
-"""
+
 class L2Normalization(Layer):
     def call(self, inputs):
         return tf.math.l2_normalize(inputs, axis=1)
-"""
+
 
 # Funcion que guarda la imagen del registro en mongo
 def imagen_register_mongodb(bd, coleccion, rostro, name, con):
@@ -154,7 +154,7 @@ def imagen_register_mongodb(bd, coleccion, rostro, name, con):
 
 # Funcion que registra el rostro, lo captura y almacena de acuerdo a los requerimientos de Facenet
 def registro_facial(usuario, frame, con):
-
+    print("Metodo de proceso de imagen ejecutandose")
     # Decodificar la imagen base64
     photo_data = frame.split(",")[1]  # Elimina el prefijo de tipo ###########
     img_data = base64.b64decode(photo_data)
@@ -272,7 +272,7 @@ def consultar_imagen_usuario_2(bd="FACEGUARD", coleccion="Register", imagen_id="
         #con.close()
         return None
 
-def login_captura_facial(user_face, frame, facenet):
+def login_captura_facial(user_face, frame):
     #num = 0
     print("Metodo login ejecutandose")
     # Decodificar la imagen base64
@@ -308,7 +308,7 @@ def login_captura_facial(user_face, frame, facenet):
 
     #plt.imshow(login_face)
     #plt.show()
-    #facenet = load_facenet_model()
+    facenet = load_facenet_model()
     user_embeddingf = calcular_embedding(facenet, user_face)
     login_embeddingf = calcular_embedding(facenet, login_face)
 

@@ -1,13 +1,13 @@
 import os
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
-os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
-from fastapi import FastAPI, UploadFile, Form, HTTPException
+#os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
+#os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
+from fastapi import FastAPI, Form, HTTPException
 from pymongo import MongoClient, errors
 from pymongo.errors import OperationFailure
-import tensorflow as tf
-from keras import Layer
-from keras.api.models import load_model
-from keras.src.saving import custom_object_scope
+#import tensorflow as tf
+#from keras import Layer
+#from keras.api.models import load_model
+#from keras.src.saving import custom_object_scope
 from dotenv import load_dotenv
 
 from registro_facial import registro_facial, login_captura_facial, consultar_imagen_usuario_2
@@ -15,7 +15,7 @@ from registro_facial import registro_facial, login_captura_facial, consultar_ima
 app = FastAPI()
 
 MONGO_CLIENT = None
-facenet = None
+#facenet = None
 
 def conectar_mongobb(MONGO_HOST = "localhost", MONGO_PORT = "27017", MONGO_DB = "Ejemplo", MONGO_TIMEOUT = 1000):
     try:
@@ -31,6 +31,7 @@ def conectar_mongobb(MONGO_HOST = "localhost", MONGO_PORT = "27017", MONGO_DB = 
     except errors.ServerSelectionTimeoutError as err:
         return "Tiempo excedido ->" + str(err)
 
+"""
 def load_facenet_model():
     try:
         with custom_object_scope({'L2Normalization': L2Normalization}):
@@ -49,11 +50,12 @@ def load_facenet_model():
 class L2Normalization(Layer):
     def call(self, inputs):
         return tf.math.l2_normalize(inputs, axis=1)
+"""
 
 @app.on_event("startup")
 def startup_event():
     conectar_mongobb()
-    load_facenet_model()
+    #load_facenet_model()
 
 # Endpoint para registrar un usuario
 @app.post("/registro/")
@@ -87,7 +89,7 @@ async def login_usuario(usuario: str = Form(...), photo: str = Form(...)):
         if user_face is None:
             raise HTTPException(status_code=500, detail="Error al recuperar la imagen")
         # Pasar directamente los datos recibidos a `registro_facial`
-        result = login_captura_facial(user_face, photo, facenet)
+        result = login_captura_facial(user_face, photo)
 
         # Validar el resultado de `registro_facial`
         if result is True:
