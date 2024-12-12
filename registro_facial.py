@@ -1,19 +1,19 @@
 import base64
 import os
 
-from dotenv import load_dotenv
+#from dotenv import load_dotenv
 
 os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
 import numpy as np
 import gridfs
 import tensorflow as tf
 import cv2
-from keras import Layer
-from keras.api.models import load_model
-from keras.src.saving import custom_object_scope
-from pymongo import MongoClient, errors
-from pymongo.errors import OperationFailure
-from bson import ObjectId
+#from keras import Layer
+#from keras.api.models import load_model
+#from keras.src.saving import custom_object_scope
+#from pymongo import MongoClient, errors
+#from pymongo.errors import OperationFailure
+#from bson import ObjectId
 
 def load_mobilenet():
     # Define el archivo
@@ -37,8 +37,9 @@ def load_mobilenet():
         print(f"Error al cargar el archivo '{archivo}': {e}")
         exit(1)
 
-load_dotenv()
+#load_dotenv()
 
+"""
 def conectar_mongobb(MONGO_HOST = "localhost", MONGO_PORT = "27017", MONGO_DB = "Ejemplo", MONGO_TIMEOUT = 1000):
     try:
         #MONGO_URI = "mongodb://localhost:27017"
@@ -49,10 +50,9 @@ def conectar_mongobb(MONGO_HOST = "localhost", MONGO_PORT = "27017", MONGO_DB = 
             return "Error en la operación "+ str(error)
     except errors.ServerSelectionTimeoutError as err:
         return "Tiempo excedido ->" + str(err)
+"""
 
-con = conectar_mongobb()
-print("Conexión realizada: ",str(con))
-
+"""
 def load_facenet_model():
     try:
         with custom_object_scope({'L2Normalization': L2Normalization}):
@@ -65,6 +65,7 @@ def load_facenet_model():
     except EOFError as e:
         print("Error al cargar el modelo:", e)
         return None
+"""
 
 """
 def load_vgg_model():
@@ -126,12 +127,14 @@ def extract_faces(image,bboxes,new_size=(160,160)):
         cropped_faces.append(cv2.resize(face,dsize=new_size))
     return cropped_faces
 
+"""
 class L2Normalization(Layer):
     def call(self, inputs):
         return tf.math.l2_normalize(inputs, axis=1)
+"""
 
 # Funcion que guarda la imagen del registro en mongo
-def imagen_register_mongodb(bd, coleccion, rostro, name):
+def imagen_register_mongodb(bd, coleccion, rostro, name, con):
     print("Metodo registro de imagen ejecutandose")
     #rostro = load_image("rostros_planos/", "c.jpg")
     #plt.imshow(cv2.cvtColor(rostro, cv2.COLOR_BGR2RGB))
@@ -150,7 +153,7 @@ def imagen_register_mongodb(bd, coleccion, rostro, name):
         return None
 
 # Funcion que registra el rostro, lo captura y almacena de acuerdo a los requerimientos de Facenet
-def registro_facial(usuario, frame):
+def registro_facial(usuario, frame, con):
 
     # Decodificar la imagen base64
     photo_data = frame.split(",")[1]  # Elimina el prefijo de tipo ###########
@@ -186,7 +189,7 @@ def registro_facial(usuario, frame):
     cv2.cvtColor(rostro, cv2.COLOR_BGR2RGB)
 
     # Registrar la imagen en MongoDB
-    img_id = imagen_register_mongodb("FACEGUARD", "Register", rostro, name)
+    img_id = imagen_register_mongodb("FACEGUARD", "Register", rostro, name, con)
 
     return img_id
 
@@ -202,6 +205,7 @@ def calcular_embedding(model, face):
     embedding = model.predict(face)
     return embedding
 
+"""
 # Funcion que obtiene desde Mongo la imagen del ususario que se quiere loggear
 def consultar_imagen_usuario(bd="FACEGUARD", coleccion="Register", imagen_id=""):
     # Conectar a MongoDB
@@ -233,8 +237,9 @@ def consultar_imagen_usuario(bd="FACEGUARD", coleccion="Register", imagen_id="")
         print(f"Ocurrió un error al recuperar la imagen: {e}")
         con.close()
         return None
+"""
 
-def consultar_imagen_usuario_2(bd="FACEGUARD", coleccion="Register", imagen_id=""):
+def consultar_imagen_usuario_2(bd="FACEGUARD", coleccion="Register", imagen_id="", con=None):
     # Conectar a MongoDB
     #con = conectar_mongobb()
     try:
@@ -267,7 +272,7 @@ def consultar_imagen_usuario_2(bd="FACEGUARD", coleccion="Register", imagen_id="
         #con.close()
         return None
 
-def login_captura_facial(user_face, frame):
+def login_captura_facial(user_face, frame, facenet):
     #num = 0
     print("Metodo login ejecutandose")
     # Decodificar la imagen base64
@@ -303,7 +308,7 @@ def login_captura_facial(user_face, frame):
 
     #plt.imshow(login_face)
     #plt.show()
-    facenet = load_facenet_model()
+    #facenet = load_facenet_model()
     user_embeddingf = calcular_embedding(facenet, user_face)
     login_embeddingf = calcular_embedding(facenet, login_face)
 
