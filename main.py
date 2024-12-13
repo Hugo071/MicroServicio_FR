@@ -4,7 +4,7 @@ import os
 from fastapi import FastAPI, Form, HTTPException
 from pymongo import MongoClient, errors
 from pymongo.errors import OperationFailure
-#import tensorflow as tf
+import tensorflow as tf
 #from keras import Layer
 #from keras.api.models import load_model
 #from keras.src.saving import custom_object_scope
@@ -16,6 +16,31 @@ app = FastAPI()
 
 MONGO_CLIENT = None
 #facenet = None
+mobilenet = None
+
+def load_mobilenet():
+    # Define el archivo
+    archivo = os.path.join(os.path.dirname(__file__), './models/graph.pb')
+    # Verifica si el archivo existe
+    if not os.path.exists(archivo):
+        print(f"Error: El archivo '{archivo}' no se encuentra en el directorio actual.")
+        exit(1)
+
+    # Intenta cargar el archivo
+    try:
+        global mobilenet
+        with tf.io.gfile.GFile(archivo, 'rb') as f:
+            graph_def = tf.compat.v1.GraphDef()
+            graph_def.ParseFromString(f.read())
+
+            with tf.Graph().as_default() as mobilenet:
+                tf.import_graph_def(graph_def, name='')
+                print("mobilnet cargado")
+                return mobilenet
+
+    except Exception as e:
+        print(f"Error al cargar el archivo '{archivo}': {e}")
+        exit(1)
 
 def conectar_mongobb(MONGO_HOST = "localhost", MONGO_PORT = "27017", MONGO_DB = "Ejemplo", MONGO_TIMEOUT = 1000):
     try:
@@ -56,6 +81,7 @@ class L2Normalization(Layer):
 def startup_event():
     conectar_mongobb()
     #load_facenet_model()
+    load_mobilenet()
 
 # Endpoint para registrar un usuario
 @app.post("/registro/")
@@ -64,7 +90,7 @@ async def registrar_usuario(usuario: str = Form(...), photo: str = Form(...)):
         if not usuario or not photo:
             raise HTTPException(status_code=400, detail="Faltan datos obligatorios")
 
-        img_id = registro_facial(usuario, photo, MONGO_CLIENT)
+        img_id = registro_facial(usuario, photo, MONGO_CLIENT, mobilenet)
 
         if img_id is None:
             raise HTTPException(status_code=422, detail="No se detectaron rostros")
@@ -89,7 +115,7 @@ async def login_usuario(usuario: str = Form(...), photo: str = Form(...)):
         if user_face is None:
             raise HTTPException(status_code=500, detail="Error al recuperar la imagen")
         # Pasar directamente los datos recibidos a `registro_facial`
-        result = login_captura_facial(user_face, photo)
+        result = login_captura_facial(user_face, photo, mobilenet)
 
         # Validar el resultado de `registro_facial`
         if result is True:

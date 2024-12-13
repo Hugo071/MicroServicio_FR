@@ -15,6 +15,7 @@ from pymongo import MongoClient, errors
 from pymongo.errors import OperationFailure
 from bson import ObjectId
 
+"""
 def load_mobilenet():
     # Define el archivo
     archivo = os.path.join(os.path.dirname(__file__), './models/graph.pb')
@@ -36,7 +37,7 @@ def load_mobilenet():
     except Exception as e:
         print(f"Error al cargar el archivo '{archivo}': {e}")
         exit(1)
-
+"""
 #load_dotenv()
 
 """
@@ -80,9 +81,9 @@ def load_vgg_model():
         return None
 """
 
-def detect_faces(image, score_threshold=0.7):
+def detect_faces(image, mobilenet, score_threshold=0.7):
     global boxes, scores
-    mobilenet = load_mobilenet()
+    #mobilenet = load_mobilenet()
     (imh, imw) = image.shape[:-1]
     img = np.expand_dims(image, axis=0)
     # Inicializar mobilenet
@@ -153,7 +154,7 @@ def imagen_register_mongodb(bd, coleccion, rostro, name, con):
         return None
 
 # Funcion que registra el rostro, lo captura y almacena de acuerdo a los requerimientos de Facenet
-def registro_facial(usuario, frame, con):
+def registro_facial(usuario, frame, con, mobilenet):
     print("Metodo de proceso de imagen ejecutandose")
     # Decodificar la imagen base64
     photo_data = frame.split(",")[1]  # Elimina el prefijo de tipo ###########
@@ -172,7 +173,7 @@ def registro_facial(usuario, frame, con):
         frame = cv2.cvtColor(frame, cv2.COLOR_BGRA2RGB)
 
     # Verificar si se detectaron rostros
-    bboxes = detect_faces(frame)
+    bboxes = detect_faces(frame, mobilenet)
     if not bboxes:
         return None
 
@@ -272,7 +273,7 @@ def consultar_imagen_usuario_2(bd="FACEGUARD", coleccion="Register", imagen_id="
         #con.close()
         return None
 
-def login_captura_facial(user_face, frame):
+def login_captura_facial(user_face, frame, mobilenet):
     #num = 0
     print("Metodo login ejecutandose")
     # Decodificar la imagen base64
@@ -292,7 +293,7 @@ def login_captura_facial(user_face, frame):
         frame = cv2.cvtColor(frame, cv2.COLOR_BGRA2RGB)
 
     # Verificar si se detectaron rostros
-    bboxes = detect_faces(frame)
+    bboxes = detect_faces(frame, mobilenet)
     if not bboxes:
         return -200
 
