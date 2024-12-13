@@ -320,7 +320,7 @@ def login_captura_facial(user_face, frame, mobilenet):
     # Comparar los embeddings de los dos rostros
     distf = np.linalg.norm(user_embeddingf - login_embeddingf)
     print("facenet: " + str(distf))
-    umbral_dist = 0.250000000
+    umbral_dist = 0.145000000
     if distf < umbral_dist:
         print("Acceso concedido: Los rostros coinciden.")
         return True
